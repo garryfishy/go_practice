@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	Services "go_practice/services"
@@ -12,17 +11,18 @@ import (
 )
 
 func Register(c *gin.Context, db *gorm.DB) {
-	newUser := Structs.Register{}
-	user := Services.InsertUser(c, db, newUser)
-	login := Services.InsertLogin(c, db, newUser)
-	fmt.Print(user, login, "<<<<< ini")
-
-	if user && login {
-		c.IndentedJSON(http.StatusCreated, gin.H{"msg": "User succesfully created"})
-	} else {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Blah blah bad request"})
+	var request Structs.Register
+	if err := c.BindJSON(&request); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
+		return
 	}
-
+	user := Services.InsertUser(c, db, request.User)
+	login := Services.InsertLogin(c, db, request.Login)
+	if user && login {
+		c.IndentedJSON(http.StatusCreated, gin.H{"msg": "User successfully created"})
+	} else {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user"})
+	}
 }
 
 func Hello(c *gin.Context) {

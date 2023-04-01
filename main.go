@@ -26,12 +26,12 @@ func main() {
 	db.Exec("CREATE DATABASE  golang_practice;")
 
 	// // Use the golang_practice database
-	// dsn = "host=localhost user=postgres password=postgres dbname=golang_practice port=5432 sslmode=disable"
-	// sqlDB, err := db.DB()
-	// if err != nil {
-	// 	panic("failed to get sql.DB")
-	// }
-	// sqlDB.Close()
+	dsn = "host=localhost user=postgres password=postgres dbname=golang_practice port=5432 sslmode=disable"
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("failed to get sql.DB")
+	}
+	sqlDB.Close()
 
 	// Auto migrate User and Login tables
 	user := Models.User{}
