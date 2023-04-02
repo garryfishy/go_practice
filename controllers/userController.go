@@ -4,11 +4,18 @@ import (
 	"net/http"
 
 	Services "go_practice/services"
+	"go_practice/structs"
 	Structs "go_practice/structs"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+func Hello(c *gin.Context) {
+
+	c.IndentedJSON(http.StatusOK, gin.H{"msg": "hello world"})
+
+}
 
 func Register(c *gin.Context, db *gorm.DB) {
 	var request Structs.Register
@@ -35,8 +42,18 @@ func Register(c *gin.Context, db *gorm.DB) {
 	}
 }
 
-func Hello(c *gin.Context) {
+func Login(c *gin.Context, db *gorm.DB) {
+	var request structs.Login
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"msg": "hello world"})
+	ok, token := Services.CheckLogin(c, db, request.Login)
 
+	if ok {
+		c.IndentedJSON(http.StatusAccepted, gin.H{"token": token})
+	} else {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+	}
 }

@@ -48,3 +48,27 @@ func InsertLogin(c *gin.Context, db *gorm.DB, model Model.Login, userID uint) bo
 
 	return true
 }
+
+func CheckLogin(c *gin.Context, db *gorm.DB, model Model.Login) (bool, string) {
+	payload := &model
+
+	// Retrieve the user from the database
+	var user Model.Login
+	result := db.Where("username = ?", payload.Username).First(&user)
+	if result.Error != nil {
+		return false, ""
+	}
+	fmt.Println("passs here 1")
+	// Check the password
+	if !Helpers.CheckPassword(payload.Password, user.Password) {
+		return false, ""
+	}
+
+	fmt.Println("passs here")
+	if token, err := Helpers.GenerateToken(payload.Username); err != nil {
+		return false, ""
+	} else {
+		return true, token
+	}
+
+}

@@ -1,0 +1,1 @@
+A Simple Go Project for practicing the basic knowledge of creating a REST API with Golang.

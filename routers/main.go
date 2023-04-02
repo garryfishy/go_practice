@@ -13,5 +13,8 @@ func Router(db *gorm.DB) *gin.Engine {
 	r.POST("/register", func(c *gin.Context) {
 		Controller.Register(c, db)
 	})
+	r.POST("/login", func(c *gin.Context) {
+		Controller.Login(c, db)
+	})
 	return r
 }
