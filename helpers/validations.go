@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	models "go_practice/models"
@@ -57,7 +56,6 @@ func ValidateLogin(login *models.Login) error {
 		}
 	}
 
-	fmt.Println(hasUppercase, hasDigit, hasLowercase, "<<<PASSWORD VALIDATE")
 	if !hasUppercase || !hasLowercase || !hasDigit {
 		return errors.New("password should contain at least one uppercase letter, one lowercase letter, and one digit")
 	}
