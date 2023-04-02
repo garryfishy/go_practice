@@ -30,7 +30,7 @@ func Register(c *gin.Context, db *gorm.DB) {
 	tx := db.Begin()
 
 	// Insert the User record
-	userID, err, Response := Services.InsertUser(c, tx, user)
+	userID, err, Response := Services.InsertUser(tx, user)
 	if err != nil {
 		tx.Rollback() // Roll back the transaction if there's an error
 		c.JSON(Response.Code, gin.H{"msg": Response.Message})
@@ -41,7 +41,7 @@ func Register(c *gin.Context, db *gorm.DB) {
 	user.ID = userID
 
 	// Insert the Login record with the retrieved UserID
-	if ok, response := Services.InsertLogin(c, tx, login, userID); ok {
+	if ok, response := Services.InsertLogin(tx, login, userID); ok {
 		// Commit the transaction if both operations are successful
 		tx.Commit()
 		c.JSON(response.Code, gin.H{"msg": response.Message})
@@ -60,7 +60,7 @@ func Login(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	ok, token := Services.CheckLogin(c, db, request.Login)
+	ok, token := Services.CheckLogin(db, request.Login)
 
 	if ok {
 		c.JSON(http.StatusAccepted, gin.H{"token": token})

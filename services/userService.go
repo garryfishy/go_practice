@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	Helpers "go_practice/helpers"
 	Model "go_practice/models"
 	Structs "go_practice/structs"
@@ -13,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InsertUser(c *gin.Context, db *gorm.DB, model Model.User) (uint, error, Structs.Response) {
+func InsertUser(db *gorm.DB, model Model.User) (uint, error, Structs.Response) {
 	payload := &model
 	response := Structs.Response{}
 	// validate the user model
@@ -32,7 +30,7 @@ func InsertUser(c *gin.Context, db *gorm.DB, model Model.User) (uint, error, Str
 	return payload.ID, nil, response
 }
 
-func InsertLogin(c *gin.Context, db *gorm.DB, model Model.Login, userID uint) (bool, Structs.Response) {
+func InsertLogin(db *gorm.DB, model Model.Login, userID uint) (bool, Structs.Response) {
 	payload := &model
 	response := Structs.Response{}
 	if err := Helpers.ValidateLogin(payload); err != nil {
@@ -63,7 +61,7 @@ func InsertLogin(c *gin.Context, db *gorm.DB, model Model.Login, userID uint) (b
 	return true, response
 }
 
-func CheckLogin(c *gin.Context, db *gorm.DB, model Model.Login) (bool, string) {
+func CheckLogin(db *gorm.DB, model Model.Login) (bool, string) {
 	payload := &model
 
 	// Retrieve the user from the database
