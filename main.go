@@ -2,46 +2,49 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
-	Router "go_practice/routers"
-
-	Models "go_practice/models"
-
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	Models "go_practice/models"
+	Router "go_practice/routers"
 )
 
 func main() {
 	fmt.Println("=========API Started=========")
 
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Get database configuration values from environment variables
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
 	// Connect to the database
-	dsn := "host=localhost user=postgres password=postgres dbname=golang_practice port=5432 sslmode=disable"
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName, dbPort)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatal("failed to connect database")
 	}
-
-	// create the database
-	// Create the database if it does not exist
-	db.Exec("CREATE DATABASE  golang_practice;")
-
-	// // Use the golang_practice database
-	dsn = "host=localhost user=postgres password=postgres dbname=golang_practice port=5432 sslmode=disable"
-	sqlDB, err := db.DB()
-	if err != nil {
-		panic("failed to get sql.DB")
-	}
-	sqlDB.Close()
 
 	// Auto migrate User and Login tables
 	user := Models.User{}
 	login := Models.Login{}
 	err = db.AutoMigrate(&user, &login)
 	if err != nil {
-		panic("failed to migrate tables")
+		log.Fatal("failed to migrate tables")
 	}
 
 	// Start the API server
 	router := Router.Router(db)
-	router.Run("localhost:9090")
+	router.Run(":9090")
 }

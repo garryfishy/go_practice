@@ -16,9 +16,19 @@ func Register(c *gin.Context, db *gorm.DB) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
 		return
 	}
-	user := Services.InsertUser(c, db, request.User)
-	login := Services.InsertLogin(c, db, request.Login)
-	if user && login {
+	user := request.User
+	login := request.Login
+
+	// Insert the User record
+	userID, err := Services.InsertUser(c, db, user)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user"})
+		return
+	}
+
+	// Insert the Login record with the retrieved UserID
+	login.UserID = userID
+	if ok := Services.InsertLogin(c, db, login, userID); ok {
 		c.IndentedJSON(http.StatusCreated, gin.H{"msg": "User successfully created"})
 	} else {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user"})

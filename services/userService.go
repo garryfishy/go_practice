@@ -11,27 +11,35 @@ import (
 	"gorm.io/gorm"
 )
 
-func InsertUser(c *gin.Context, db *gorm.DB, model Model.User) bool {
+func InsertUser(c *gin.Context, db *gorm.DB, model Model.User) (uint, error) {
 	payload := &model
-	fmt.Println(payload, "<<<ini palod")
+	// validate the user model
+	if err := Helpers.ValidateUserModel(payload); err != nil {
+		fmt.Println("Error validating user model:", err)
+		return 0, err
+	}
 
 	if result := db.Create(payload); result.Error != nil {
 		fmt.Println("Error creating user:", result.Error)
-		return false
+		return 0, result.Error
 	}
 
-	return true
+	return payload.ID, nil
 }
 
-func InsertLogin(c *gin.Context, db *gorm.DB, model Model.Login) bool {
-
+func InsertLogin(c *gin.Context, db *gorm.DB, model Model.Login, userID uint) bool {
 	payload := &model
+	if err := Helpers.ValidateLogin(payload); err != nil {
+		fmt.Println("Errir validating login")
+		return false
+	}
 	hashed, err := Helpers.HashPassword(payload.Password)
 	if err != nil {
 		fmt.Println("Error hashing password in InsertLogin:", err)
 		return false
 	}
 	model.Password = hashed
+	model.UserID = userID
 
 	if result := db.Create(payload); result.Error != nil {
 		fmt.Println("Error creating record in InsertLogin:", result.Error)

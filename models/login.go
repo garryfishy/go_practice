@@ -7,6 +7,6 @@ import (
 type Login struct {
 	gorm.Model
 	UserID   uint   `json:"user_id"`
-	Username string `json:"username"`
+	Username string `json:"username" gorm:"uniqueIndex"`
 	Password string `json:"password"`
 }
