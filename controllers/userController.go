@@ -27,19 +27,31 @@ func Register(c *gin.Context, db *gorm.DB) {
 	login := request.Login
 
 	// Insert the User record
-	userID, err := Services.InsertUser(c, db, user)
+	// Start a database transaction
+	tx := db.Begin()
+
+	// Insert the User record
+	userID, err, Response := Services.InsertUser(c, tx, user)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user"})
+		tx.Rollback() // Roll back the transaction if there's an error
+		c.IndentedJSON(Response.Code, gin.H{"msg": Response.Message})
 		return
 	}
 
+	// Update the user object with the newly created UserID
+	user.ID = userID
+
 	// Insert the Login record with the retrieved UserID
-	login.UserID = userID
-	if ok := Services.InsertLogin(c, db, login, userID); ok {
-		c.IndentedJSON(http.StatusCreated, gin.H{"msg": "User successfully created"})
+	if ok, response := Services.InsertLogin(c, tx, login, userID); ok {
+		// Commit the transaction if both operations are successful
+		tx.Commit()
+		c.IndentedJSON(response.Code, gin.H{"msg": response.Message})
 	} else {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user"})
+		// Roll back the transaction if there's an error
+		tx.Rollback()
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user!"})
 	}
+
 }
 
 func Login(c *gin.Context, db *gorm.DB) {
