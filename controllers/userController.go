@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	Services "go_practice/services"
-	"go_practice/structs"
 	Structs "go_practice/structs"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +54,7 @@ func Register(c *gin.Context, db *gorm.DB) {
 }
 
 func Login(c *gin.Context, db *gorm.DB) {
-	var request structs.Login
+	var request Structs.Login
 	if err := c.BindJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
