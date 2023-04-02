@@ -13,14 +13,14 @@ import (
 
 func Hello(c *gin.Context) {
 
-	c.IndentedJSON(http.StatusOK, gin.H{"msg": "hello world"})
+	c.JSON(http.StatusOK, gin.H{"msg": "hello world"})
 
 }
 
 func Register(c *gin.Context, db *gorm.DB) {
 	var request Structs.Register
 	if err := c.BindJSON(&request); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request body"})
 		return
 	}
 	user := request.User
@@ -34,7 +34,7 @@ func Register(c *gin.Context, db *gorm.DB) {
 	userID, err, Response := Services.InsertUser(c, tx, user)
 	if err != nil {
 		tx.Rollback() // Roll back the transaction if there's an error
-		c.IndentedJSON(Response.Code, gin.H{"msg": Response.Message})
+		c.JSON(Response.Code, gin.H{"msg": Response.Message})
 		return
 	}
 
@@ -45,11 +45,11 @@ func Register(c *gin.Context, db *gorm.DB) {
 	if ok, response := Services.InsertLogin(c, tx, login, userID); ok {
 		// Commit the transaction if both operations are successful
 		tx.Commit()
-		c.IndentedJSON(response.Code, gin.H{"msg": response.Message})
+		c.JSON(response.Code, gin.H{"msg": response.Message})
 	} else {
 		// Roll back the transaction if there's an error
 		tx.Rollback()
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user!"})
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "Failed to create user!"})
 	}
 
 }
@@ -64,8 +64,8 @@ func Login(c *gin.Context, db *gorm.DB) {
 	ok, token := Services.CheckLogin(c, db, request.Login)
 
 	if ok {
-		c.IndentedJSON(http.StatusAccepted, gin.H{"token": token})
+		c.JSON(http.StatusAccepted, gin.H{"token": token})
 	} else {
-		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 	}
 }
